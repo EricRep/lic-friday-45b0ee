@@ -145,6 +145,7 @@ button.btn{font-family:inherit;cursor:pointer}
   <div class="filters" role="group" aria-label="Show">
     <button type="button" data-f="all" class="fchip on">All</button>
     <button type="button" data-f="shop">📚 Books + shops</button>
+    <button type="button" data-f="grocery">🛒 Groceries</button>
     <button type="button" data-f="walkin">🍽️ Walk-in food</button>
     <button type="button" data-f="eat">🍽️ Book ahead</button>
     <button type="button" data-f="drink">🍸 Drinks</button>
@@ -188,7 +189,7 @@ const AREAS = [
     { name:"Casa Enrique", tag:"🍽️ Book ahead", ll:[40.7438,-73.9548], hours:[17*60,22*60+30], hoursText:"5–10:30pm",
       note:"Michelin-recognized Mexican. Great food, lively room, not quiet. ~8 min.",
       map:M("Casa Enrique, 5-48 49th Ave, Long Island City, NY"), site:"https://resy.com/cities/ny/casa-enrique", phone:"347-448-6040" },
-    { name:"Hunters Point Wines & Spirits", ll:[40.7450,-73.9531], tag:"🍷 Shop", star:true, hours:[12*60,21*60], hoursText:"Noon–9pm",
+    { name:"Hunters Point Wines & Spirits", ll:[40.7450,-73.9531], tag:"🍷 Groceries · wine", star:true, hours:[12*60,21*60], hoursText:"Noon–9pm",
       note:"Small-producer wine shop, a neighborhood fixture since 2006. Vernon at 47th Ave.", more:"Their site lists a Friday tasting 6–8pm, call to confirm",
       map:M("Hunters Point Wines and Spirits, 47-07 Vernon Blvd, Long Island City, NY"), site:"https://www.hunterspointwines.com", phone:"718-472-9463" },
     { name:"Book Culture LIC", ll:[40.7478,-73.9440], tag:"📚 Books", hours:null,
@@ -211,7 +212,7 @@ const AREAS = [
     { name:"Main Concourse + Whispering Gallery", ll:[40.7527,-73.977], hours:[5*60+15,26*60], hoursText:"Free · till 2am",
       note:"Star ceiling. Whisper into opposite corners of the arch outside the Oyster Bar.",
       map:M("Grand Central Terminal, New York, NY") },
-    { name:"Grand Central Market", ll:[40.7527,-73.9768], tag:"🛍️ Food shop · walk-in", hours:[7*60,20*60], hoursText:"7am–8pm",
+    { name:"Grand Central Market", ll:[40.7527,-73.9768], tag:"🛒 Groceries · walk-in", hours:[7*60,20*60], hoursText:"7am–8pm",
       note:"Commuters' gourmet market in the Lexington passage. Cheese, bread, treats to go.",
       map:M("Grand Central Market, New York, NY"), site:"https://grandcentralterminal.com/grand-central-market/" }
   ]},
@@ -302,6 +303,7 @@ function travel(o,d){
   return {min:m, txt:"🚇 ~"+m+" min ("+Math.round(w1)+" walk + "+Math.round(tr)+" wait and train + "+Math.round(w2)+" walk)"};
 }
 function kind(p){ const t=(p.tag||"");
+  if(/Groceries/.test(t)) return "grocery";
   if(/books|shop/i.test(t)) return "shop";
   if(/Walk-in|🍕/.test(t)) return /Wine|🍷/.test(t)?"drink":"walkin";
   if(/Book ahead/.test(t)) return "eat";
