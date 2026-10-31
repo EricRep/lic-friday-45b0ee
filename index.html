@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LIC Friday">
+<title>LIC Friday</title>
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
+<style>
+/* Layout: one calm column. "Now" card on top, four areas folded shut, open one at a time. */
+:root{
+  --bg:#EEF1EA; --card:#FBFCF8; --ink:#1E2A22; --muted:#5C6A60; --line:#D7DDD2;
+  --moss:#2F5B44; --moss-soft:#DCE8DF;
+  --pumpkin:#B9561A; --pumpkin-soft:#F6E3D3;
+  --ok:#2E7D4F; --ok-soft:#DDEFE3; --warn:#9A6200; --warn-soft:#F7EBCF; --off:#7A7F7B; --off-soft:#E6E8E4;
+  --display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141A16; --card:#1C241F; --ink:#E9EEE8; --muted:#A3B0A6; --line:#2D3832;
+  --moss:#8CC7A3; --moss-soft:#22352A; --pumpkin:#F0965A; --pumpkin-soft:#3A2618;
+  --ok:#7FD39E; --ok-soft:#1F3428; --warn:#F2C46B; --warn-soft:#3A2F17; --off:#9AA09C; --off-soft:#262C28;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141A16; --card:#1C241F; --ink:#E9EEE8; --muted:#A3B0A6; --line:#2D3832;
+  --moss:#8CC7A3; --moss-soft:#22352A; --pumpkin:#F0965A; --pumpkin-soft:#3A2618;
+  --ok:#7FD39E; --ok-soft:#1F3428; --warn:#F2C46B; --warn-soft:#3A2F17; --off:#9AA09C; --off-soft:#262C28;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1{font-family:var(--display);font-weight:800;font-size:30px;line-height:1.1;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:2px 0 0;font-size:15px}
+.now{background:var(--moss);color:var(--card);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:6px}
+.now .lab{font-size:13px;letter-spacing:.08em;text-transform:uppercase;opacity:.85;font-weight:700}
+.now .big{font-family:var(--display);font-weight:800;font-size:24px;line-height:1.15}
+.now .tip{font-size:15px;opacity:.92}
+details.area{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+details.area>summary{list-style:none;cursor:pointer;padding:16px;display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center}
+details.area>summary::-webkit-details-marker{display:none}
+summary:focus-visible,a:focus-visible{outline:3px solid var(--pumpkin);outline-offset:2px}
+.step{width:40px;height:40px;border-radius:12px;background:var(--moss-soft);color:var(--moss);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:20px}
+.area.busy .step{background:var(--pumpkin-soft);color:var(--pumpkin)}
+.aname{font-family:var(--display);font-weight:600;font-size:20px;line-height:1.15}
+.when{color:var(--muted);font-size:14px}
+.chev{color:var(--muted);font-size:20px;transition:transform .2s}
+details[open] .chev{transform:rotate(90deg)}
+.places{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.place{padding:14px 16px;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--line)}
+.place:last-child{border-bottom:0}
+.prow{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.pname{font-weight:700;font-size:18px;min-width:0}
+.star{color:var(--pumpkin)}
+.chip{flex:none;font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.chip.open{background:var(--ok-soft);color:var(--ok)}
+.chip.soon{background:var(--warn-soft);color:var(--warn)}
+.chip.closed,.chip.later{background:var(--off-soft);color:var(--off)}
+.chip.call{background:var(--warn-soft);color:var(--warn)}
+.chip.ticket{background:var(--pumpkin-soft);color:var(--pumpkin)}
+.note{color:var(--ink);font-size:15px;margin:0}
+.more{color:var(--muted);font-size:14px;margin:0}
+.warn{color:var(--warn);font-size:14px;font-weight:700;margin:0}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.btn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-size:15px;font-weight:700;padding:9px 14px;border-radius:12px;border:1px solid var(--line);color:var(--ink);background:var(--bg);min-height:40px}
+.btn.map{background:var(--moss);color:var(--card);border-color:var(--moss)}
+.phone{font-variant-numeric:tabular-nums}
+.heads{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.heads summary{cursor:pointer;font-weight:700;list-style:none}
+.heads summary::-webkit-details-marker{display:none}
+.heads ul{margin:10px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:15px}
+.foot{color:var(--muted);font-size:13px;text-align:center}
+@media (prefers-reduced-motion:reduce){.chev{transition:none}}
+.from{font-size:15px;margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.reset{font:inherit;font-size:14px;font-weight:700;color:var(--moss);background:var(--card);border:0;border-radius:10px;padding:6px 10px;cursor:pointer}
+button.btn{font-family:inherit;cursor:pointer}
+.btn.here{background:var(--pumpkin-soft);color:var(--pumpkin);border-color:transparent}
+.tag{display:inline-block;font-size:13px;font-weight:700;padding:2px 8px;border-radius:8px;background:var(--moss-soft);color:var(--moss);margin-right:4px}
+.filters{display:flex;flex-wrap:wrap;gap:8px}
+.filters button{font:inherit;font-size:15px;font-weight:700;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;min-height:40px}
+.filters button.on{background:var(--moss);color:var(--card);border-color:var(--moss)}
+.empty{padding:14px 16px;color:var(--muted);font-size:15px;margin:0}
+.btn.gps{background:var(--card);color:var(--moss);border-color:var(--card)}
+.btn.ghost{background:transparent;color:var(--card);border-color:rgba(255,255,255,.5)}
+.near{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.near h2{font-family:var(--display);font-weight:600;font-size:20px;margin:0;padding:14px 16px 6px}
+.near .place{border-top:1px solid var(--line)}
+.search{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.search summary{cursor:pointer;font-weight:700;list-style:none;font-size:17px}
+.search summary::-webkit-details-marker{display:none}
+.search .btns{margin-top:10px}
+.walk{background:var(--pumpkin-soft);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.walk summary{cursor:pointer;font-weight:700;list-style:none;font-size:17px}
+.walk summary::-webkit-details-marker{display:none}
+.walk ol{margin:10px 0 8px;padding-left:22px;display:flex;flex-direction:column;gap:6px;font-size:15px}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>LIC Friday</h1>
+    <p class="sub">Fri Oct 30 · Culture Lab, then the 7 to Hudson Yards · tap a stop to open it</p>
+  </header>
+
+  <section class="now" aria-live="polite">
+    <span class="lab">Right now</span>
+    <span class="big" id="nowArea">Stop 1 · Culture Lab area</span>
+    <span class="tip" id="nowTip"></span>
+    <span class="from">Times from: <b id="fromName">Culture Lab</b></span>
+    <div class="btns">
+      <button type="button" class="btn gps" id="gpsBtn" onclick="useGPS()">📍 Where are we?</button>
+      <button type="button" id="resetHome" class="btn ghost" hidden onclick="setOrigin(null)">↺ Culture Lab</button>
+    </div>
+    <span class="tip" id="gpsMsg" hidden></span>
+  </section>
+
+  <section class="near" id="nearBox" hidden>
+    <h2>Closest to you</h2>
+    <div id="nearList"></div>
+  </section>
+
+  <details class="search">
+    <summary>🔎 Search around us in Maps</summary>
+    <p class="more">Opens Apple Maps near wherever you are right now.</p>
+    <div class="btns" id="searchBtns"></div>
+  </details>
+
+  <details class="walk">
+    <summary>🚇 Walk to the 7 · ~8 min</summary>
+    <ol>
+      <li>Leave Culture Lab, walk east on 46th Ave to Vernon Blvd.</li>
+      <li>Turn right, south on Vernon Blvd, about 4 blocks to 50th Ave.</li>
+      <li>Manhattan-bound stairs: NE corner of Vernon Blvd and 50th Ave (or north side of 50th Ave at Jackson Ave).</li>
+      <li>Next stops toward Hudson Yards: Grand Central, 5 Av, Times Sq, 34 St-Hudson Yards (last stop).</li>
+    </ol>
+    <div class="btns"><a class="btn map" href="https://maps.apple.com/?saddr=5-25%2046th%20Ave%2C%20Long%20Island%20City%2C%20NY&daddr=Vernon%20Blvd-Jackson%20Av%20Station%2C%20Long%20Island%20City%2C%20NY&dirflg=w" target="_blank" rel="noopener">📍 Walking route</a></div>
+  </details>
+
+  <div class="filters" role="group" aria-label="Show">
+    <button type="button" data-f="all" class="fchip on">All</button>
+    <button type="button" data-f="shop">📚 Books + shops</button>
+    <button type="button" data-f="walkin">🍽️ Walk-in food</button>
+    <button type="button" data-f="eat">🍽️ Book ahead</button>
+    <button type="button" data-f="drink">🍸 Drinks</button>
+    <button type="button" data-f="see">👀 See + walk</button>
+  </div>
+  <div id="areas"></div>
+
+  <details class="heads">
+    <summary>⚠️ Heads up (5 things)</summary>
+    <ul>
+      <li>Sunset ~5:56pm. The waterfront is dark after that, piers are lit.</li>
+      <li>Friday 7-8pm is theater rush around Times Sq. Book anything there.</li>
+      <li>The Lambs Club is closed for good. Skip it.</li>
+      <li>The Campbell: smart casual, no T-shirts, shorts or caps for men.</li>
+      <li>Bryant Park Winter Village opened this week. Busy, not quiet.</li>
+    </ul>
+  </details>
+
+  <p class="foot">Tap 📍 Where are we? or 📌 We're here and every time updates from that spot · times are estimates, incl. ~5 min waiting for the 7 · "Call" means hours not confirmed · checked Fri 10/30</p>
+</div>
+
+<script>
+const M = q => "https://maps.apple.com/?q=" + encodeURIComponent(q);
+const AREAS = [
+  { n:1, name:"Culture Lab area", st:"vj", when:"Vernon Blvd-Jackson Av", from:0, to:19*60+30, places:[
+    { name:"Tournesol", tag:"🍽️ Book ahead", ll:[40.7425,-73.954], star:true, hours:[17*60+30,23*60], hoursText:"5:30–11pm",
+      note:"Small French bistro, grown-up, good wine. 1 block from the 7.", warn:"Small room, book on Resy",
+      map:M("Tournesol, 50-12 Vernon Blvd, Long Island City, NY"), site:"https://resy.com/cities/ny/tournesol-restaurant", phone:"718-472-4355" },
+    { name:"Maiella", tag:"🍽️ Book ahead", ll:[40.7468,-73.958], hours:[17*60,22*60+30], hoursText:"5–10:30pm",
+      note:"Italian, handmade pasta, skyline view. Next to Gantry Plaza, ~5 min from Culture Lab.", more:"Big room absorbs noise · Book ahead, Friday fills",
+      map:M("Maiella, 4610 Center Blvd, Long Island City, NY"), site:"https://www.opentable.com/r/maiella-lic-long-island-city-2", phone:"718-606-1770" },
+    { name:"Gantry Plaza State Park", ll:[40.7455,-73.959], hours:null, chipText:"After dark",
+      note:"Riverfront piers, Pepsi sign, full Manhattan skyline. Next to Maiella.", more:"Posted dawn to dusk, piers lit at night",
+      map:M("Gantry Plaza State Park, Long Island City, NY") },
+    { name:"Gizi Wine, Cheese & Chocolate", tag:"🍷 Walk-in", ll:[40.7448,-73.9535], hours:null,
+      note:"Tiny wine bar, tables for two, cheese and chocolate. On Vernon near 47th Ave, ~3 min.", more:"Hours not posted, call first",
+      map:M("Gizi, 47-34 Vernon Blvd, Long Island City, NY"), phone:"718-208-1731" },
+    { name:"Manducatis Rustica", ll:[40.7459,-73.9533], tag:"🍽️ Walk-in at the bar", hours:[16*60,21*60+30], hoursText:"Kitchen till 9:30pm",
+      note:"Old-school family Italian, dark calm dining room, older crowd. Bar up front for walk-ins.", more:"They suggest booking a table, bar is first come",
+      map:M("Manducatis Rustica, 46-35 Vernon Blvd, Long Island City, NY"), phone:"718-937-1312" },
+    { name:"Casa Enrique", tag:"🍽️ Book ahead", ll:[40.7438,-73.9548], hours:[17*60,22*60+30], hoursText:"5–10:30pm",
+      note:"Michelin-recognized Mexican. Great food, lively room, not quiet. ~8 min.",
+      map:M("Casa Enrique, 5-48 49th Ave, Long Island City, NY"), site:"https://resy.com/cities/ny/casa-enrique", phone:"347-448-6040" },
+    { name:"Hunters Point Wines & Spirits", ll:[40.7450,-73.9531], tag:"🍷 Shop", star:true, hours:[12*60,21*60], hoursText:"Noon–9pm",
+      note:"Small-producer wine shop, a neighborhood fixture since 2006. Vernon at 47th Ave.", more:"Their site lists a Friday tasting 6–8pm, call to confirm",
+      map:M("Hunters Point Wines and Spirits, 47-07 Vernon Blvd, Long Island City, NY"), site:"https://www.hunterspointwines.com", phone:"718-472-9463" },
+    { name:"Book Culture LIC", ll:[40.7478,-73.9440], tag:"📚 Books", hours:null,
+      note:"Two-floor indie bookstore at Court Sq. The real-deal local bookshop.", more:"Hours and 2026 status not confirmed, call first",
+      map:M("Book Culture, 26-09 Jackson Ave, Long Island City, NY"), site:"https://www.bookculture.com", phone:"718-440-3120" },
+    { name:"sLICe", ll:[40.7438,-73.9546], tag:"🍕 Walk-in", hours:[11*60,24*60], hoursText:"11am–midnight",
+      note:"Neighborhood pizza, sit down or grab a slice. Vernon at 48th Ave.", more:"Hours from a listing, not their site · casual, not fancy",
+      map:M("sLICe LIC Pizzeria, 48-11 Vernon Blvd, Long Island City, NY"), site:"https://www.slicelic.com", phone:"718-937-5423" }
+  ]},
+  { n:2, name:"Grand Central", st:"gc", when:"1st stop", from:-1, to:-1, places:[
+    { name:"The Campbell", tag:"🍸 Bar", ll:[40.7527,-73.9774], star:true, hours:[12*60,26*60], hoursText:"Noon–2am",
+      note:"1920s office turned cocktail bar. Painted ceiling, adult crowd. Vanderbilt Ave side.", warn:"Smart casual, no T-shirts or caps for men",
+      map:M("The Campbell, 15 Vanderbilt Ave, New York, NY"), site:"https://www.thecampbellnyc.com", phone:"917-209-3440" },
+    { name:"Cipriani Dolci", tag:"🍽️ Book ahead", ll:[40.7525,-73.9771], hours:[11*60+30,22*60], hoursText:"11:30am–10pm",
+      note:"Italian on the balcony over the Main Concourse. Dinner and the view in one.", more:"Book on Resy",
+      map:M("Cipriani Dolci, Grand Central Terminal, New York, NY"), site:"https://www.cipriani.com/cipriani-dolci", phone:"212-973-0999" },
+    { name:"Oyster Bar", ll:[40.7524,-73.9772], hours:[11*60+30,21*60+30], hoursText:"11:30am–9:30pm",
+      tag:"🍽️ Walk-in at the counter", note:"1913 landmark under tile vaults, a real New York institution. Sit at the counter, no reservation.", more:"One listing says 8:30pm close, call",
+      map:M("Grand Central Oyster Bar, New York, NY"), site:"https://www.oysterbarny.com", phone:"212-490-6650" },
+    { name:"Main Concourse + Whispering Gallery", ll:[40.7527,-73.977], hours:[5*60+15,26*60], hoursText:"Free · till 2am",
+      note:"Star ceiling. Whisper into opposite corners of the arch outside the Oyster Bar.",
+      map:M("Grand Central Terminal, New York, NY") },
+    { name:"Grand Central Market", ll:[40.7527,-73.9768], tag:"🛍️ Food shop · walk-in", hours:[7*60,20*60], hoursText:"7am–8pm",
+      note:"Commuters' gourmet market in the Lexington passage. Cheese, bread, treats to go.",
+      map:M("Grand Central Market, New York, NY"), site:"https://grandcentralterminal.com/grand-central-market/" }
+  ]},
+  { n:3, name:"5 Av / Bryant Park", st:"fa", when:"2nd stop · exit 42nd St + 5th Ave", from:-1, to:-1, places:[
+    { name:"Bookmarks Lounge", tag:"🍸 Bar", ll:[40.7515,-73.9805], star:true, hours:null,
+      note:"14th-floor rooftop bar in the Library Hotel. Fireplace, quiet, adult. Madison at 41st, ~5 min.", more:"Opens 4pm · can close for private events, call first",
+      map:M("Library Hotel, 299 Madison Ave, New York, NY"), site:"https://www.libraryhotel.com/en/clubroom-lounges.html", phone:"212-983-4500" },
+    { name:"Bryant Park Grill", tag:"🍽️ Book ahead", ll:[40.753,-73.9832], hours:[11*60+30,21*60], hoursText:"11:30am–9pm",
+      note:"Park-view dining behind the library. Older, theater crowd. ~3 min.", more:"Busier this week with the Winter Village · book ahead",
+      map:M("Bryant Park Grill, 25 W 40th St, New York, NY"), site:"https://bryantpark.org/shop-eat/bryant-park-grill", phone:"212-206-8815" },
+    { name:"Winter Village market", tag:"🛍️ Holiday shops", ll:[40.7536,-73.9832], hours:[11*60,20*60], hoursText:"Market till 8pm · rink till 10pm",
+      note:"Holiday kiosks and free skating in the park.", warn:"Touristy and crowded, opening weekend",
+      map:M("Bryant Park, New York, NY"), site:"https://bryantpark.org" },
+    { name:"Kinokuniya", ll:[40.7545,-73.9840], tag:"📚 Books", star:true, hours:[10*60,20*60], hoursText:"10am–8pm",
+      note:"Three floors of Japanese and English books, art books and the best pen and notebook counter in the city. 6th Ave at 41st.", more:"Hours from a book-trade listing, own site wouldn't load",
+      map:M("Kinokuniya, 1073 6th Ave, New York, NY"), site:"https://usa.kinokuniya.com", phone:"212-869-1700" },
+    { name:"Bryant Park Cafe", ll:[40.7533,-73.9830], tag:"🍽️ Walk-in", hours:[11*60+30,21*60], hoursText:"11:30am–9pm",
+      note:"First come, first served, same building as the Grill. A drink or light bite with a park view.", more:"Shares the Grill's posted hours",
+      map:M("Bryant Park Cafe, 25 W 40th St, New York, NY"), site:"https://bryantpark.org/shop-eat/bryant-park-grill", phone:"212-206-8815" }
+  ]},
+  { n:4, name:"Times Sq", st:"ts", when:"3rd stop · busy, head west to 44th–46th", from:-1, to:-1, busy:true, places:[
+    { name:"Sardi's", tag:"🍽️ Book ahead", ll:[40.758,-73.9878], hours:null,
+      note:"1927 theater restaurant, caricatures on the walls, older crowd. W 44th St, ~5 min.", more:"Touristy now · quiet once shows start (~8pm) · hours not confirmed",
+      map:M("Sardi's, 234 W 44th St, New York, NY"), phone:"212-221-8440" },
+    { name:"Bar Centrale", tag:"🍸 Bar", ll:[40.7604,-73.989], hours:null,
+      note:"Tiny upstairs martini bar, theater-crowd regulars. W 46th St, ~12 min.", warn:"Reservations needed, call (its old website is not the bar)",
+      map:M("Bar Centrale, 324 W 46th St, New York, NY"), phone:"212-581-3130" },
+    { name:"Joe Allen", ll:[40.7605,-73.9891], hours:null,
+      tag:"🍽️ Walk-in at the bar", note:"Brick-wall Broadway bistro where theater people actually eat. Next door to Bar Centrale.", more:"Hours not confirmed",
+      map:M("Joe Allen, 326 W 46th St, New York, NY"), phone:"212-581-6464" },
+    { name:"Drama Book Shop", ll:[40.7547,-73.9917], tag:"📚 Books", star:true, hours:[10*60,19*60], hoursText:"10am–7pm",
+      note:"Theater people's bookstore since 1917. Couches, scripts, quiet. W 39th St, ~8 min.", warn:"Closes 7pm, go early",
+      map:M("The Drama Book Shop, 266 W 39th St, New York, NY"), site:"https://dramabookshop.com", phone:"212-944-0595" }
+  ]},
+  { n:5, name:"Hudson Yards", st:"hy", when:"Last stop", from:19*60+30, to:24*60, places:[
+    { name:"Electric Lemon", tag:"🍽️ Book ahead", ll:[40.754,-74.0013], star:true, hours:[17*60,23*60], hoursText:"5–11pm",
+      note:"24th-floor dining room in the Equinox Hotel. Skyline views, calm, spaced out. ~4 min.", more:"Book ahead",
+      map:M("Electric Lemon, 33 Hudson Yards, New York, NY"), site:"https://equinox-hotels.com/nyc/restaurants-bars/electric-lemon/", phone:"212-812-9202" },
+    { name:"Ci Siamo", tag:"🍽️ Book ahead", ll:[40.752,-73.9975], hours:[16*60+30,22*60], hoursText:"4:30–10pm",
+      note:"Danny Meyer wood-fire Italian. Warm, grown-up. Manhattan West, ~8 min east on 33rd.", more:"Book ahead",
+      map:M("Ci Siamo, 440 W 33rd St, New York, NY"), site:"https://cisiamonyc.com", phone:"212-219-6559" },
+    { name:"Peak", tag:"🍽️ Book ahead", ll:[40.7536,-74.0005], hours:[17*60,22*60+30], hoursText:"5–10:30pm",
+      note:"101st floor above Edge, big views. Can get lively, ask for an early table.", more:"Touristy",
+      map:M("Peak, 30 Hudson Yards, New York, NY"), site:"https://taogroup.com/venues/peak-restaurant-new-york/", phone:"212-317-0113" },
+    { name:"Zou Zou's", tag:"🍽️ Book ahead", ll:[40.7515,-73.9968], hours:[17*60,23*60], hoursText:"5–11pm",
+      note:"Eastern Mediterranean at the Pendry. Stylish, louder on Fridays. ~10 min.",
+      map:M("Zou Zou's, 385 Ninth Ave, New York, NY"), phone:"212-380-8585" },
+    { name:"High Line", ll:[40.7523,-74.002], hours:[7*60,22*60], hoursText:"Free · till 10pm",
+      note:"Quietest walk. Enter at 30th St and 10th Ave, ~7 min.",
+      map:M("High Line, W 30th St and 10th Ave, New York, NY"), site:"https://www.thehighline.org/visit/" },
+    { name:"Edge", ll:[40.7536,-74.0005], ticket:false, hours:[9*60,22*60], hoursText:"Till 10pm · last entry ~9pm",
+      note:"Outdoor sky deck, 100th floor. Level 4 of the Shops.", more:"Touristy · timed tickets, ~$42",
+      map:M("Edge NYC, 30 Hudson Yards, New York, NY"), site:"https://www.edgenyc.com" },
+    { name:"Vessel", ll:[40.7538,-74.0022], hours:[11*60,19*60], hoursText:"11am–7pm",
+      note:"Stair sculpture next to the station exit.", more:"Touristy · Halloween concert after 7pm",
+      map:M("Vessel, Hudson Yards, New York, NY"), site:"https://www.vesselnyc.com" },
+    { name:"Mercado Little Spain", ll:[40.7527,-74.0017], tag:"🍽️ Walk-in", hours:[11*60,22*60], hoursText:"11am–10pm",
+      note:"José Andrés' Spanish food hall. Tapas counters, no reservation. Next to the High Line entrance.", more:"Lively, grab seats at a counter",
+      map:M("Mercado Little Spain, 10 Hudson Yards, New York, NY"), site:"https://www.hudsonyardsnewyork.com/food-drink/mercado-little-spain", phone:"646-495-1242" }
+  ]}
+];
+
+// ---- travel estimates (approximate coordinates, ~80 m per minute walking) ----
+const HOME = {name:"Culture Lab", ll:[40.7473,-73.9555], area:1};
+const ST = { vj:{ll:[40.7426,-73.9536],ride:0,pen:1}, gc:{ll:[40.7516,-73.9764],ride:3,pen:2},
+  fa:{ll:[40.7536,-73.9819],ride:5,pen:1}, ts:{ll:[40.7553,-73.9873],ride:6,pen:1}, hy:{ll:[40.7557,-74.0021],ride:10,pen:3} };
+const WAIT = 5;
+AREAS.forEach(a=>a.places.forEach(p=>p.area=a.n));
+const AREA_ST = Object.fromEntries(AREAS.map(a=>[a.n,a.st]));
+function walkMin(a,b){
+  const k=Math.PI/180, dy=(b[0]-a[0])*111320, dx=(b[1]-a[1])*111320*Math.cos(a[0]*k);
+  const r=29*k, u=dx*Math.cos(r)-dy*Math.sin(r), v=dx*Math.sin(r)+dy*Math.cos(r);  // street grid
+  return (Math.abs(u)+Math.abs(v))/80;
+}
+function travel(o,d){
+  if(o.name===d.name) return {min:0, txt:"📌 You're here"};
+  const sa=ST[AREA_ST[o.area]], sb=ST[AREA_ST[d.area]];
+  const direct = walkMin(o.ll,d.ll);
+  const w1=walkMin(o.ll,sa.ll), w2=walkMin(sb.ll,d.ll);
+  const tr = sa.pen+WAIT+Math.abs(sa.ride-sb.ride)+sb.pen;
+  const viaTrain = w1+tr+w2;
+  const riverCross = (o.area===1) !== (d.area===1);
+  if(!riverCross && (sa===sb || direct<=viaTrain)){
+    const m=Math.max(1,Math.round(direct));
+    return {min:m, txt:"🚶 "+m+" min walk"};
+  }
+  const m=Math.round(viaTrain);
+  return {min:m, txt:"🚇 ~"+m+" min ("+Math.round(w1)+" walk + "+Math.round(tr)+" wait and train + "+Math.round(w2)+" walk)"};
+}
+function kind(p){ const t=(p.tag||"");
+  if(/books|shop/i.test(t)) return "shop";
+  if(/Walk-in|🍕/.test(t)) return /Wine|🍷/.test(t)?"drink":"walkin";
+  if(/Book ahead/.test(t)) return "eat";
+  if(/Bar|🍷/.test(t)) return "drink";
+  return "see"; }
+let FILTER="all";
+try{ FILTER=localStorage.getItem("lic-filter")||"all"; }catch(e){}
+document.querySelectorAll("[data-f]").forEach(b=>{
+  b.classList.toggle("on", b.dataset.f===FILTER);
+  b.addEventListener("click",()=>{ FILTER=b.dataset.f;
+    document.querySelectorAll("[data-f]").forEach(x=>x.classList.toggle("on",x===b));
+    try{ localStorage.setItem("lic-filter",FILTER); }catch(e){}
+    render(); }); });
+let ORIGIN = HOME;
+try{ const saved=JSON.parse(localStorage.getItem("lic-origin")||"null");
+  if(saved){ const f=AREAS.flatMap(a=>a.places).find(p=>p.name===saved); if(f) ORIGIN=f; } }catch(e){}
+const SEARCHES=["Quiet wine bar","Bookstore","Cozy restaurant","Italian restaurant","Coffee","Dessert","Cocktail bar","Park","Independent shop","Bakery"];
+document.getElementById("searchBtns").innerHTML = SEARCHES.map(q=>`<a class="btn" target="_blank" rel="noopener" href="https://maps.apple.com/?q=${encodeURIComponent(q)}">${esc(q)}</a>`).join("");
+function nearestArea(ll){ let best=1,bd=1e9; for(const a of AREAS){ const d=walkMin(ll,ST[a.st].ll); if(d<bd){bd=d;best=a.n;} } return best; }
+function useGPS(){
+  const msg=document.getElementById("gpsMsg"); msg.hidden=false; msg.textContent="Finding you…";
+  if(!navigator.geolocation){ msg.textContent="Location not available on this phone."; return; }
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const ll=[pos.coords.latitude,pos.coords.longitude];
+    ORIGIN={name:"where you are", ll, area:nearestArea(ll), gps:true};
+    try{ localStorage.removeItem("lic-origin"); }catch(e){}
+    msg.hidden=true; render(); window.scrollTo({top:0,behavior:"smooth"});
+  }, err=>{ msg.textContent="Couldn't get your location. Allow location for this page, or tap 📌 We're here on a place instead."; }, {enableHighAccuracy:true,timeout:10000,maximumAge:60000});
+}
+function placeCard(p,t,tv){
+  const s=status(p,t);
+  return `<div class="place">
+    <div class="prow"><span class="pname">${p.star?'<span class="star">★</span> ':""}${esc(p.name)}</span><span class="chip ${s.cls}">${esc(s.txt)}</span></div>
+    <p class="note">${p.tag?`<span class="tag">${esc(p.tag)}</span> `:""}${esc(p.note)}${p.hoursText?` <span class="more">· ${esc(p.hoursText)}</span>`:""}</p>
+    <p class="more"><b>${esc(tv.txt)}</b>${tv.min?` <span>from ${esc(ORIGIN.name)}</span>`:""}</p>
+    ${p.more?`<p class="more">${esc(p.more)}</p>`:""}
+    ${p.warn?`<p class="warn">⚠️ ${esc(p.warn)}</p>`:""}
+    <div class="btns">
+      <a class="btn map" href="${p.map}" target="_blank" rel="noopener">📍 Map</a>
+      ${p.site?`<a class="btn" href="${p.site}" target="_blank" rel="noopener">Website</a>`:""}
+      ${p.phone?`<a class="btn phone" href="tel:${p.phone.replace(/-/g,"")}">📞 ${p.phone}</a>`:""}
+      ${ORIGIN.name===p.name?"":`<button class="btn here" type="button" data-here="${esc(p.name)}">📌 We're here</button>`}
+    </div></div>`;
+}
+function setOrigin(name){
+  const f=AREAS.flatMap(a=>a.places).find(p=>p.name===name);
+  ORIGIN = f || HOME;
+  try{ if(f) localStorage.setItem("lic-origin",name); else localStorage.removeItem("lic-origin"); }catch(e){}
+  render(); window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function nowET(){
+  try{
+    const p = new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",hour:"numeric",minute:"numeric",hour12:false}).formatToParts(new Date());
+    const h = +p.find(x=>x.type==="hour").value % 24, m = +p.find(x=>x.type==="minute").value;
+    return h*60+m;
+  }catch(e){ const d=new Date(); return d.getHours()*60+d.getMinutes(); }
+}
+function fmt(min){ min=min%1440; const h=Math.floor(min/60), m=min%60, ap=h>=12?"pm":"am", hh=((h+11)%12)+1; return hh+(m?":"+String(m).padStart(2,"0"):"")+ap; }
+function status(pl, t){
+  if(!pl.hours) return {cls:"call", txt: pl.chipText || "Call"};
+  const [o,c]=pl.hours;
+  if(t<o) return {cls:"later", txt:"Opens "+fmt(o)};
+  if(t>=c) return {cls:"closed", txt:"Closed now"};
+  if(c-t<=45) return {cls:"soon", txt:"Closes "+fmt(c)};
+  return {cls:"open", txt:"Open · till "+fmt(c)};
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch])); }
+
+function render(){
+  const t = nowET();
+  const cur = (ORIGIN!==HOME && AREAS.find(a=>a.n===ORIGIN.area)) || AREAS.find(a=>t>=a.from && t<a.to) || AREAS[0];
+  if(ORIGIN.gps) ORIGIN.area = nearestArea(ORIGIN.ll);
+  const box = document.getElementById("areas");
+  const openState = {};
+  box.querySelectorAll("details.area").forEach(d=>openState[d.dataset.n]=d.open);
+  box.innerHTML = AREAS.map(a=>{
+    const isOpen = FILTER!=="all" ? true : ((a.n in openState) ? openState[a.n] : a===cur);
+    return `<details class="area${a.busy?" busy":""}" data-n="${a.n}" ${isOpen?"open":""}>
+      <summary><span class="step">${a.n}</span><span><span class="aname">${esc(a.name)}</span><br><span class="when">${esc(a.when)} · ${(()=>{const m=Math.min(...a.places.map(p=>travel(ORIGIN,p).min));return m===0?"you're here":"from ~"+m+" min";})()}</span></span><span class="chev" aria-hidden="true">›</span></summary>
+      <div class="places">${(()=>{const L=a.places.filter(p=>FILTER==="all"||kind(p)===FILTER);return L.length?"":`<p class="empty">Nothing in this filter at this stop.</p>`;})()}${a.places.filter(p=>FILTER==="all"||kind(p)===FILTER).map(p=>({p,tv:travel(ORIGIN,p)})).sort((x,y)=>x.tv.min-y.tv.min).map(({p,tv})=>placeCard(p,t,tv)).join("")}</div></details>`;
+  }).join("");
+  const openNow = cur.places.filter(p=>{const s=status(p,t);return s.cls==="open"||s.cls==="soon";});
+  document.getElementById("fromName").textContent = ORIGIN.name;
+  const nearBox=document.getElementById("nearBox");
+  if(ORIGIN!==HOME){
+    const all=AREAS.flatMap(a=>a.places).filter(p=>p.name!==ORIGIN.name && (FILTER==="all"||kind(p)===FILTER))
+      .map(p=>({p,tv:travel(ORIGIN,p),st:status(p,t)}))
+      .filter(x=>x.st.cls!=="closed")
+      .sort((x,y)=>x.tv.min-y.tv.min).slice(0,5);
+    nearBox.hidden=!all.length;
+    document.getElementById("nearList").innerHTML = all.map(x=>placeCard(x.p,t,x.tv)).join("");
+    nearBox.querySelectorAll("[data-here]").forEach(b=>b.addEventListener("click",()=>setOrigin(b.dataset.here)));
+  } else nearBox.hidden=true;
+  document.getElementById("resetHome").hidden = (ORIGIN===HOME);
+  box.querySelectorAll("[data-here]").forEach(b=>b.addEventListener("click",()=>setOrigin(b.dataset.here)));
+  document.getElementById("nowArea").textContent = "Stop "+cur.n+" · "+cur.name;
+  document.getElementById("nowTip").textContent = openNow.length
+    ? "Open now: "+openNow.slice(0,3).map(p=>p.name).join(", ")+"."
+    : "Most places here open at 5pm. ★ = best fit for a quiet night.";
+}
+render();
+setInterval(render, 60000);
+</script>
+
+</body>
+</html>
